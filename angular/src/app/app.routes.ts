@@ -1,3 +1,4 @@
+import { authGuard, permissionGuard } from '@abp/ng.core';
 import { Routes } from '@angular/router';
 
 export const appRoutes: Routes = [
@@ -25,5 +26,6 @@ export const appRoutes: Routes = [
   {
     path: 'books',
     loadComponent: () => import('./book/book.component').then(m => m.BookComponent),
+    canActivate: [authGuard, permissionGuard],
   },
 ];
