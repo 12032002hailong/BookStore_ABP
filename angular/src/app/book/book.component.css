@@ -1,0 +1,14 @@
+.ngb-dp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ngb-dp-navigation-chevron {
+  font-size: 1rem;
+  margin: 0 4px;
+}
+.ngb-dp-navigation-select {
+  margin: 0 8px;
+  min-width: 90px; /* giữ dropdown không chồng chữ */
+}
