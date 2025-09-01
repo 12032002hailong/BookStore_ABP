@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { ListService, PagedResultDto } from '@abp/ng.core';
-import { BookDto, BookService, bookTypeOptions } from '@proxy/books';
+import { AuthorLookupDto, BookDto, BookService, bookTypeOptions } from '@proxy/books';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms'; // add this
 import { SharedModule } from '../shared/shared.module';
 import { NgbDatepickerModule } from '@ng-bootstrap/ng-bootstrap'; // add this line
 import { NgbDateNativeAdapter, NgbDateAdapter } from '@ng-bootstrap/ng-bootstrap';
 import { ConfirmationService, Confirmation } from '@abp/ng.theme.shared';
+import { map, Observable } from 'rxjs';
 
 @Component({
   selector: 'app-book',
@@ -19,8 +20,13 @@ import { ConfirmationService, Confirmation } from '@abp/ng.theme.shared';
 })
 export class BookComponent implements OnInit {
   book = { items: [], totalCount: 0 } as PagedResultDto<BookDto>;
+
   form: FormGroup;
+
   selectedBook = {} as BookDto;
+
+  authors$: Observable<AuthorLookupDto[]>;
+
   bookTypes = bookTypeOptions;
 
   isModalOpen = false;
@@ -30,7 +36,9 @@ export class BookComponent implements OnInit {
     private bookService: BookService,
     private fb: FormBuilder,
     private confirmation: ConfirmationService
-  ) {}
+  ) {
+    this.authors$ = bookService.getAuthorLookup().pipe(map(r => r.items));
+  }
 
   ngOnInit() {
     const bookStreamCreator = query => this.bookService.getList(query);
@@ -39,6 +47,7 @@ export class BookComponent implements OnInit {
       this.book = response;
     });
   }
+
   createBook() {
     this.selectedBook = {} as BookDto;
     this.buildForm();
@@ -53,17 +62,10 @@ export class BookComponent implements OnInit {
     });
   }
 
-  delete(id: string) {
-    this.confirmation.warn('::AreYouSureToDelete', '::AreYouSure').subscribe(status => {
-      if (status === Confirmation.Status.confirm) {
-        this.bookService.delete(id).subscribe(() => this.list.get());
-      }
-    });
-  }
-
   buildForm() {
     this.form = this.fb.group({
-      name: [this.selectedBook.name || '', Validators.required],
+      authorId: [this.selectedBook.authorId || null, Validators.required],
+      name: [this.selectedBook.name || null, Validators.required],
       type: [this.selectedBook.type || null, Validators.required],
       publishDate: [
         this.selectedBook.publishDate ? new Date(this.selectedBook.publishDate) : null,
@@ -86,6 +88,14 @@ export class BookComponent implements OnInit {
       this.isModalOpen = false;
       this.form.reset();
       this.list.get();
+    });
+  }
+
+  delete(id: string) {
+    this.confirmation.warn('::AreYouSureToDelete', 'AbpAccount::AreYouSure').subscribe(status => {
+      if (status === Confirmation.Status.confirm) {
+        this.bookService.delete(id).subscribe(() => this.list.get());
+      }
     });
   }
 }
