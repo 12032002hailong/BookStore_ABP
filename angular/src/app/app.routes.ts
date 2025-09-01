@@ -1,5 +1,6 @@
 import { authGuard, permissionGuard } from '@abp/ng.core';
 import { Routes } from '@angular/router';
+import { AuthorComponent } from './author/author.component';
 
 export const appRoutes: Routes = [
   {
@@ -26,6 +27,11 @@ export const appRoutes: Routes = [
   {
     path: 'books',
     loadComponent: () => import('./book/book.component').then(m => m.BookComponent),
+    canActivate: [authGuard, permissionGuard],
+  },
+  {
+    path: 'authors',
+    loadComponent: () => import('./author/author.component').then(m => m.AuthorComponent),
     canActivate: [authGuard, permissionGuard],
   },
 ];
